@@ -1,4 +1,4 @@
-# Flashing the DESPI-M02
+# Flashing an Adruino Sketch to the DESPI-M02 
 
 Here are the instructions to flash a program to the DESPI-M02. I wrote these
 because I had trouble finding a comprehensive programming guide for that board.
@@ -65,6 +65,10 @@ without a hitch.
 At any rate, it starts by picking the right package for your operating system
 from the
 [STM32 Cube Programmer download page](https://www.st.com/en/development-tools/stm32cubeprog.html).
+
+If you prefer to use open source tools, or if you get horribly stuck installing
+the Cube Programmer, you can also use the `stm32flash` command line tool. This
+is detailed under [Flash using `stm32flash`](#flash-using-stm32flash), below.
 
 ## Arduino Tools Setup
 
@@ -141,6 +145,40 @@ With the FQBN, we can compile and flash this board using the following commands:
 arduino-cli compile -v --fqbn STMicroelectronics:stm32:GenF1:pnum=GENERIC_F103VETX,upload_method=serialMethod despi-m02-arduino.ino
 arduino-cli upload -v -t -p /dev/cu.usbserial-110 --fqbn STMicroelectronics:stm32:GenF1:pnum=GENERIC_F103VETX,upload_method=serialMethod despi-m02-arduino.ino
 ```
+
+## Flash using `stm32flash`
+
+If you want an alternative to the STM's Cube Programmer, you can also use
+`stm32flash` to write the compiled binary to the board. I have not found a way
+to have the Arduino IDE use `stm32flash`, so this description is for the command
+line only.
+
+First install `stm32flash` using `brew` (assuming you are on a Mac):
+
+```sh
+brew install stm32flash
+```
+
+Once installed, you can compile the code using the Arduino command line tool.
+While compiling, it is easier to specify where you want the compiler to store
+the generated binaries. Otherwise you would have to find it in some cache
+somewhere. The `--build-path` option to `arduino-cli` allows us to specify where
+the output goes. Let's say we put the compiled code into `target`.
+
+We can then put the board into flash mode and call the programmer to flash the
+binary from the `target` directory, as shown below.
+
+```sh
+arduino-cli compile -v --build-path target --fqbn STMicroelectronics:stm32:GenF1:pnum=GENERIC_F103VETX despi-m02-arduino.ino
+stm32flash -w target/despi-m02-arduino.ino.bin -v -g 0x0 /dev/cu.usbserial-110
+```
+
+We omit the `upload_method` from the FQBN, since that is an option that is
+specific to the Cube Programmer.
+
+The `-g 0x0` command to `stm32flash` tells the programmer to start your program
+after flashing it. Specifically, it tells your board to start running at flash
+address 0x0.
 
 Hope this helps.
 
