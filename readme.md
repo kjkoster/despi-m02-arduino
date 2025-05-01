@@ -134,11 +134,6 @@ You may recognise some of the parts of the FQBN from the tools menu setup that
 we discussed earlier. For example, the `pnum` clearly refers to the board part
 number and the `upload_method` instructs Cube to use the serial port directly.
 
-The compiler output also prints other things that are good to know, such as the
-GCC triplet of the cross compiler. Handy to know if you ever want to program
-your board using Rust, for example. For the DESPI-M02 that triplet is
-`arm-none-eabi`.
-
 With the FQBN, we can compile and flash this board using the following commands:
 
 ```sh
