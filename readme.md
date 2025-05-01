@@ -83,7 +83,7 @@ image below. If your board has a different processor, change the board part
 number accordingly.
 
 <p align="center" width="100%">
-    <img width="30%" src="images/chip.png">
+    <img width="50%" src="images/chip.png">
 </p>
 
 Finally change the "Upload method" to using STM's Cube Programmer for serial
