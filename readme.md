@@ -1,41 +1,70 @@
-# Flashing an Adruino Sketch to the DESPI-M02 
+# Flashing an Arduino Sketch to the DESPI-M02
 
-Here are the instructions to flash a program to the DESPI-M02. I wrote these
+Here are instructions to flash an Arduino sketch the DESPI-M02. I wrote these
 because I had trouble finding a comprehensive programming guide for that board.
 My DESPI-M02s came with the e-paper samples I bought, so I might as well make
-good use of them. What's nice about them is that they have all of the STM32 pins
-broken out into a headers, neatly marked with the pin names as defined in the
-Arduino code.
+good use of them.
+
+In this howto, I try to show not only the code, but also explain how to use the
+board schematic to be able to find details that are important to programming.
+We'll see how on-board peripherals are wired and how you can determine which pin
+numbers to use to control them. The schematic also shows other details, such as
+whether a pin is active-low or if a pin needs a pull-up or pull-down resistor.
+All these will save you time and headaches when you are programming for a board.
 
 I use Mac OS X and the examples and screenshots are from my Mac system. If you
 use Linux or something else, please adjust the commands accordingly.
 
-In this example, I use the Arduino IDE with the
+In this example, I show you three ways to flash your program to the STM32 board:
+use the Arduino IDE with the
 [STM32 Cube Programmer](https://www.st.com/en/development-tools/stm32cubeprog.html)
-provided by [STMicroelectronics](https://st.com/).
+provided by [STMicroelectronics](https://st.com/), flash from the command line
+using `arduino-cli` and finally flash from the command line using `stm32flash`.
+
+By the way, this is a sister project to
+[despi-m02-rust](https://github.com/kjkoster/despi-m02-rust), in case you want
+to do the same with a Rust program.
 
 ## Pin Definitions
 The DESPI-M02 is not a very widely used board, it seems. There are some obvious
-issues with the board definitions, though these are easy to work around with the
-schematic in hand.
+issues with the Arduino board definitions for this device, though these are easy
+to work around with the schematic in hand. That makes this board an ideal
+platform to learn how to read schematics.
 
-The first problem is that the serial monitor is configured to use the wrong
-pins. The serial monitor from your Arduino IDE does not work with the default
-definitions. Referring to the
-[DESP-M02 schematic](https://www.good-display.com/companyfile/DESPI-M02-SCH-31.html)
-shows that the serial port is on pins `PA9` and `PA10`.
+In this project, we will develop a form of blinky for this board: one where
+the blink speed of the on-board `LED4` is controlled by the on-board push-button
+`S1`.
+
+Before we can even get to that, there is a problem with getting debug logging.
+The serial monitor is configured to use the wrong pins by default, so your
+Arduino IDE will not show any serial logging. Referring to the
+[DESPI-M02 schematic](https://www.good-display.com/companyfile/DESPI-M02-SCH-31.html)
+shows that the serial port is connected to pins `PA9` and `PA10`. `PA9` is the
+transmit (TX) pin and `PA10` is the receive pin (RX). Flow control is not
+connected, so we ignore that. Flow control is not really needed for debug
+logging anyway.
 
 <p align="center" width="100%">
     <img width="50%" src="images/schematic-rx-tx.png">
 </p>
 
 While we are have the schema out, let's find the pins for the on-board `LED4`
-and the push-button `S1`. We'll name the `LED4` pin `PE12` `LED_BUILTIN`, so
-that example sketches will make use of it. We will name the push-button `S1`.
+and the push-button `S1`. We'll name the `LED4` pin `PE12` as `LED_BUILTIN` in
+code, to match example sketches. We will name the push-button `S1`.
 
 <p align="center" width="100%">
     <img width="50%" src="images/schematic-led4-s1.png">
 </p>
+
+The schema shows that `LED4` is active-low. It is tied to the 3.3V rail. In
+order for current to flow, and the LED to light up, we have to pull pin `PE12`
+low. We should start our sketch with the `LED4` in the low state, so that
+immediately after boot, the LED will light up. This makes the code appear to
+start faster, not unlike a splash screen for GUI applications does.
+
+The push button is also active-low. The schema shows that when the button is
+pressed, it pulls pin `PE11` to the ground rail. We should configure the input
+to have a pull-up resistor.
 
 ```C++
 #define PIN_SERIAL_TX PA9   // on-board UART TX pin
@@ -142,11 +171,11 @@ arduino-cli upload -v -t -p /dev/cu.usbserial-110 --fqbn STMicroelectronics:stm3
 ```
 
 ## Flash using `stm32flash`
-
-If you want an alternative to the STM's Cube Programmer, you can also use
-`stm32flash` to write the compiled binary to the board. I have not found a way
-to have the Arduino IDE use `stm32flash`, so this description is for the command
-line only.
+If you want an open source alternative to the STM's Cube Programmer, you can
+use [`stm32flash`](https://github.com/stm32duino/stm32flash) to write the
+compiled binary to the board. Officially, `stm32flash` is deprecated, but I
+found it a lot easier to install and use than the STM32 Cube Programmer that
+replaces it.
 
 First install `stm32flash` using `brew` (assuming you are on a Mac):
 
