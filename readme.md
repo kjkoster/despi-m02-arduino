@@ -80,7 +80,7 @@ The serial interface is already configured by the time we are ready to call
 ```C++
 Serial.setTx(PIN_SERIAL_TX);
 Serial.setRx(PIN_SERIAL_RX);
-Serial.begin(57600);
+Serial.begin(115200);
 ```
 
 A complete working example, with all these components in use, can be found in
@@ -100,7 +100,6 @@ the Cube Programmer, you can also use the `stm32flash` command line tool. This
 is detailed under [Flash using `stm32flash`](#flash-using-stm32flash), below.
 
 ## Arduino Tools Setup
-
 Next, set up the board and programmer details in the Arduino Tools menu. Connect
 your computer and the board using a micro-USB cable. Select `Generic STM32F1
 series` as the board and pick the right serial port for your device. In my case
@@ -124,7 +123,6 @@ screenshot of what your tools configuration might look like.
 </p>
 
 ## Entering Flash Mode
-
 To program the board, you first have to switch it into flash mode. For STM32
 chips, this is done by pulling pin `boot0` high while the chip powers up. On the
 board schematic, we can see that this is made available as header `P12`.

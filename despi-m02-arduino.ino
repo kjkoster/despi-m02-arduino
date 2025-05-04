@@ -14,19 +14,19 @@
 
 volatile bool fast = false;
 volatile unsigned long suppress_interrupts_until = millis();
-const unsigned long bounce_time_ms = 500;
+const unsigned long bounce_time_ms = 200;
 
 bool high = false;
 
 void setup() {
+  // light the active-low ED early, so the system feels fast
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
   // The generic config does not define the TX and RX pins correctly.
   Serial.setTx(PIN_SERIAL_TX);
   Serial.setRx(PIN_SERIAL_RX);
-  Serial.begin(57600);
-  delay(500);
-  Serial.println("booting...");
-
-  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(115200);
 
   pinMode(S1, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(S1), on_S1_pressed, FALLING);
